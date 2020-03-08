@@ -1,8 +1,9 @@
 
 
-
-
+#include <stdio.h> //:printf(...)
+#include "LLC.H"
 int main( void ){
 
+    LLC_LoadPrintF( &printf );
 
 }//[main]//
