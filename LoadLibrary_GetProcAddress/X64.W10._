@@ -1,7 +1,20 @@
 
 //: FILE[ X64.W10._ ]( 64Bit Code, Windows10 )
-#define LIB JOHN_MARK_ISAAC_MADISON_S_PEBWALK_WIN10_X64 ////////
-#define FN( name ) LIB##name
+#define LIB LLC_PEBWALK_WIN10_X64 //: <--Class
+#define lib llc_pebwalk_win10_x64 //: <--Instance
+
+#define               macro_GH2( a , b )            a## _ ##b
+#define               macro_gh2( a , b ) macro_GH2( a   ,   b )
+#define FN( fn_name ) macro_gh2( LIB, fn_name )
+
+//:Prototypes:
+////////////////////////////////////////////////////////////////
+
+void  FN( DoubleCheckValues )( void );
+void  FN( Init )( struct LLC_init_info init_info );
+void* FN( GetBaseAddressOf_PEB )( void );
+
+////////////////////////////////////////////////////////////////
 
 //: Objective/Goal:
 //: Get function pointers to GetProcAddressA() & LoadLibraryA()
@@ -61,21 +74,23 @@
 //:pieces of data so that we can extract what we need
 //:without any header files. Effectively, we have only
 //:the data members we care about here.
-struct PEBWALK_WIN10_X64 {
+struct LLC_PEBWALK_WIN10_X64 {
+
+    unsigned char un_used_comma_hack;
                                             
     //: H: hex number - - - - - - - - - - - /////////////////://
     //: A: address    - - - - - - - - - - - /////////////////://
     //: S: struct     - - - - - - - - - - - /////////////////://
     #define H unsigned long long int        //://////////////://
-    #define A void*    //:- - - - - - - - - /////////////////://
+    #define A unsigned long long int        //://////////////://
     #define S( name ) struct LIB ## name    //://////////////://
 
     S( PE_FILE_SIGNATURE_CODES ){
 
-        IMAGE_DOS_SIGNATURE          ; //: 0x5A4D     : MZ
-        IMAGE_OS2_SIGNATURE          ; //: 0x454E     : NE
-        IMAGE_OS2_SIGNATURE_LE       ; //: 0x454C     : LE
-        IMAGE_NT_SIGNATURE           ; //: 0x00004550 : PE00
+        H   IMAGE_DOS_SIGNATURE      ; //: 0x5A4D     : MZ
+        H   IMAGE_OS2_SIGNATURE      ; //: 0x454E     : NE
+        H   IMAGE_OS2_SIGNATURE_LE   ; //: 0x454C     : LE
+        H   IMAGE_NT_SIGNATURE       ; //: 0x00004550 : PE00
         
     }  PE_FILE_SIGNATURE_CODES       ;
     S( IMAGE_DATA_DIRECTORY ){
@@ -110,28 +125,144 @@ struct PEBWALK_WIN10_X64 {
             A   base_address         ;
             A   buffer               ; //: Buffer
 
-        }FullDllName                 ;
+        }full_dll_name               ; //:FullDllName
     }LDR_DATA_TABLE_ENTRY            ;
     S( IMAGE_NT_HEADERS ){
 
         A   optional_header          ; //: OptionalHeader
 
-    }  IMAGE_NT_HEADERS;
+    }  IMAGE_NT_HEADERS              ;
     S( IMAGE_DOS_HEADER ){
 
         A   e_lfanew                 ; //: e_lfanew
 
-    }  IMAGE_DOS_HEADER;
+    }  IMAGE_DOS_HEADER              ;
+    S( PEB ){
+        A PEB_Ldr                    ; //:PEB.Ldr
+
+        //:   Ldr.in_memory_order_module_list
+        A     Ldr_in_memory_order_module_list 
+                                     ;
+        //:       in_memory_order_module_list.f_link
+        A         in_memory_order_module_list_f_link 
+                                     ;
+    }PEB                             ;
 
     
 
     #undef  H  /////////////////////////////////////////////////
     #undef  A  /////////////////////////////////////////////////
     #undef  S  /////////////////////////////////////////////////
+}lib={
+    .un_used_comma_hack = 0
+
+    #define  _ PE_FILE_SIGNATURE_CODES
+
+           ,._.IMAGE_DOS_SIGNATURE     = 0x5A4D     //: MZ
+           ,._.IMAGE_OS2_SIGNATURE     = 0x454E     //: NE
+           ,._.IMAGE_OS2_SIGNATURE_LE  = 0x454C     //: LE
+           ,._.IMAGE_NT_SIGNATURE      = 0x00004550 //: PE00
+
+    #undef   _
+    #define  _ IMAGE_DATA_DIRECTORY
+
+           ,._.virtual_address = 0x00
+
+    #undef   _
+    #define  _ IMAGE_OPTIONAL_HEADER
+
+           ,._.data_directory  = 0x70
+
+    #undef   _
+    #define  _ IMAGE_EXPORT_DIRECTORY
+
+           ,._.address_of_functions      = 0x1C
+           ,._.address_of_names          = 0x20
+           ,._.address_of_name_ordinals  = 0x24
+           ,._.number_of_names           = 0x18
+
+    #undef   _
+    #define  _ LIST_ENTRY
+
+           ,._.f_link =  0x00
+
+    #undef   _
+    #define  _ LDR_DATA_TABLE_ENTRY
+        
+           ,._.reserved_2                 = 0x20
+           ,._.full_dll_name.base_address = 0x48
+           ,._.full_dll_name.buffer       = 0x08
+
+    #undef   _
+    #define  _ IMAGE_NT_HEADERS
+
+           ,._.optional_header = 0x18
+
+    #undef   _
+    #define  _ IMAGE_DOS_HEADER
+    
+           ,._.e_lfanew        = 0x3C
+
+    #undef   _
+    #define  _ PEB
+
+           ,._.    PEB_Ldr                                = 0x18
+           ,._.    Ldr_in_memory_order_module_list        = 0x20
+           ,._.        in_memory_order_module_list_f_link = 0x00
+
+    #undef   _
 };
 
+void
+FN( DoubleCheckValues )( void ){
+
+    if(0
+    ||0x00 != lib.IMAGE_DATA_DIRECTORY   . virtual_address 
+
+    ||0x18 != lib.IMAGE_NT_HEADERS       . optional_header
+    ||0x3C != lib.IMAGE_DOS_HEADER       . e_lfanew   
+    ||0x70 != lib.IMAGE_OPTIONAL_HEADER  . data_directory
+
+    ||0x1C != lib.IMAGE_EXPORT_DIRECTORY . address_of_functions     
+    ||0x20 != lib.IMAGE_EXPORT_DIRECTORY . address_of_names         
+    ||0x24 != lib.IMAGE_EXPORT_DIRECTORY . address_of_name_ordinals  
+    ||0x18 != lib.IMAGE_EXPORT_DIRECTORY . number_of_names     
+    
+    ||0x00 != lib.LIST_ENTRY             . f_link
+
+    ||0x20 != lib.LDR_DATA_TABLE_ENTRY   . reserved_2
+    ||0x48 != lib.LDR_DATA_TABLE_ENTRY   . full_dll_name.base_address
+    ||0x08 != lib.LDR_DATA_TABLE_ENTRY   . full_dll_name.buffer
+
+    ||0x18 != lib.PEB . PEB_Ldr
+    ||0x20 != lib.PEB . Ldr_in_memory_order_module_list
+    ||0x00 != lib.PEB . in_memory_order_module_list_f_link
+    ){
+        LLC_Halt("[FAILED:DoubleCheckValues]");
+    }else{
+        LLC_Okay("[PASSED:DoubleCheckVaules]");
+    };;
+}
+
+
+//: init_info is NOT a pointer:
+void FN( Init )( 
+    struct LLC_init_info 
+               init_info 
+){
+
+    LLC_PFN_PrintF addressof_LoadPrintF=(
+        init_info.printf
+    );;
+
+    LLC_LoadPrintF( addressof_LoadPrintF );
+    FN( DoubleCheckValues )( );
+
+}
+
+
 void*
-FN( GetBaseAddressOf_PEB ){
+FN( GetBaseAddressOf_PEB )( void ){
 
     void* base_address = 0;
     unsigned long long var_out = 0;
@@ -201,5 +332,8 @@ FN( GetBaseAddressOf_PEB ){
     //: } IMAGE_FILE_HEADER, *PIMAGE_FILE_HEADER;
 
 
-#undef  LIB ////////////////////////////////////////////////////
-#undef   FN ////////////////////////////////////////////////////
+#undef  lib       //////////////////////////////////////////////
+#undef  LIB       //////////////////////////////////////////////
+#undef   FN       //////////////////////////////////////////////
+#undef  macro_GH2 //////////////////////////////////////////////
+#undef  macro_gh2 //////////////////////////////////////////////

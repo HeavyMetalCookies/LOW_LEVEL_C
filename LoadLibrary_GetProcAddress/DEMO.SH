@@ -11,6 +11,9 @@ gcc                             \
         -Wpedantic              \
         -Wall                   \
         -Wextra                 \
+        -Wmissing-prototypes    \
+        -Wstrict-prototypes     \
+        -Wold-style-definition  \
         -std=c11                #
                                 #
 gcc -o EXE.exe object_file.o    #                 
@@ -21,3 +24,9 @@ rm     EXE.exe                  #
 read -p "[ENTER_TO_EXIT]:"      #
 #################################
 
+    ## Help catch errors in ancient C code. Might as well.
+    ## Add these in. More strictness the better.
+    ## -Wmissing-prototypes  
+    ## -Wstrict-prototypes   
+    ## -Wold-style-definition
+    ## https://stackoverflow.com/questions/5277560

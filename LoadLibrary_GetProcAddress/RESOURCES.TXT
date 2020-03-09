@@ -1,0 +1,41 @@
+
+RESOURCES: (Related to PEBWALK)
+================================================================
+
+    KOWALCZYK:
+        Has a diagram of the PEB file and talks about how
+        the header in new window's programs has a stub program
+        that can be run in MS-DOS. Which usually says:
+
+        "This program cannot be run in DOS mode."
+
+        https://blog.kowalczyk.info/articles/pefileformat.html
+
+
+    OWL_CODE:
+        http://ropgadget.com/posts/pebwalk.html
+
+================================================================
+
+//|¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯|//
+//| Windows 10, x64                                          |//
+//|                                                          |//
+//| 0x00: IMAGE_DATA_DIRECTORY    . VirtualAddress           |//
+//| 0x70: IMAGE_OPTIONAL_HEADER   . DataDirectory            |//
+//| 0x1C: IMAGE_EXPORT_DIRECTORY  . AddressOfFunctions       |//
+//| 0x20: IMAGE_EXPORT_DIRECTORY  . AddressOfNames           |//
+//| 0x24: IMAGE_EXPORT_DIRECTORY  . AddressOfNameOrdinals    |//
+//| 0x18: IMAGE_EXPORT_DIRECTORY  . NumberOfNames            |//
+//| 0x18: IMAGE_NT_HEADERS        . OptionalHeader           |//
+//| 0x3C: IMAGE_DOS_HEADER        . e_lfanew                 |//
+//| 0x00: LIST_ENTRY              . Flink                    |//
+//| 0x20: LDR_DATA_TABLE_ENTRY    .Reserved2[0]              |//
+//|                                                          |//
+//| 0x48: LDR_DATA_TABLE_ENTRY    .FullDllName               |//
+//| 0x08:                          FullDllName.Buffer        |//
+//|                                                          |//
+//| 0x18: PEB.Ldr                                            |//
+//| 0x20:     Ldr.InMemoryOrderModuleList                    |//
+//| 0x00:         InMemoryOrderModuleList.Flink              |//
+//|                                                          |//
+//|__________________________________________________________|//

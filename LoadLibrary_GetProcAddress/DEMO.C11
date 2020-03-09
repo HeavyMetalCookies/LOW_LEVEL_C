@@ -4,6 +4,13 @@
 #include "LLC.H"
 int main( void ){
 
-    LLC_LoadPrintF( &printf );
+    struct LLC_init_info 
+               init_info=
+    {
+        .printf = &printf
+    };;
+
+ //:LLC_LoadPrintF( &printf );
+    LLC_Init(     init_info );
 
 }//[main]//

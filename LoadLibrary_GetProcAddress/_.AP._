@@ -1,0 +1,114 @@
+//:AP:Any_Platform:
+
+
+////////////////////////////////////////////////////////////////
+//:Generic Function Pointers (PFN: Pointer To Function)
+//:In two calling conventions: STDCALL & CDECL:
+////////////////////////////////////////////////////////////////
+typedef void ( __stdcall *LLC_PFN_STDCALL )( void ); //:WIN__32
+typedef void ( __cdecl   *LLC_PFN_CDECL   )( void ); //:VARARGS
+
+//:SEE[ _cprintf_p ]IN[ conio.h ]OF[ mingw / gcc ]
+typedef 
+    int 
+        ( __cdecl *LLC_PFN_PrintF )(
+            const char * __restrict__ _Format,...
+        );
+
+////////////////////////////////////////////////////////////////
+//:Prototypes:
+////////////////////////////////////////////////////////////////
+
+    void __stdcall LLC_ExampleFunc_STDCALL( void );
+    void __cdecl   LLC_ExampleFunc_CDECL(   void );
+    void LLC_LoadPrintF( LLC_PFN_PrintF address  );
+
+    void LLC_Pass( const char* msg );
+    void LLC_Fail( const char* msg );
+    void LLC_Halt( const char* msg );
+    void LLC_Okay( const char* msg );
+
+////////////////////////////////////////////////////////////////
+//:Example to show you where calling convention goes on
+//:function declarations in C code: SC[ ccfuncdec_examples ]
+////////////////////////////////////////////////////////////////
+    #define LLC_MACRO_END_FUNCTION /////////////////////////////
+    void __stdcall LLC_ExampleFunc_STDCALL( void ){
+
+        //:DoNothing
+
+    } LLC_MACRO_END_FUNCTION
+    void __cdecl   LLC_ExampleFunc_CDECL(   void ){
+
+        //:DoNothing
+
+    } LLC_MACRO_END_FUNCTION
+    #undef LLC_MACRO_END_FUNCTION //////////////////////////////
+////////////////////////////////////////////////////////////////
+
+
+
+
+struct LLC_init_info{
+    LLC_PFN_PrintF printf ;
+};//:struct
+
+LLC_PFN_PrintF llc_pfn_PrintF = ((void*)0);
+
+void LLC_LoadPrintF( LLC_PFN_PrintF address ){
+
+    if( 0 == address ){ 
+
+        //:NoNewsIsBadNews
+
+    }else{
+        llc_pfn_PrintF=( address );
+
+        llc_pfn_PrintF("[LLC_LoadPrintF:SUCCESS!]\n");
+
+        //:Inline cast to function pointer, then call:
+        (
+            (   int( __cdecl *)( const char* )   )
+            llc_pfn_PrintF
+        )(
+            "[LLC_LoadPrintF:SUCCESS!]\n"
+        );
+
+        
+
+    };;
+    return;
+}//[x]//
+
+//:Halt And Okay:
+////////////////////////////////////////////////////////////////
+
+    //:Halt & Okay are more general that "Pass" or "Fail".
+    //:Pretty sure that is why they were choosen.
+    //:Halt: Used to crash program and tell user what's wrong.
+    //:Okay: Used to give some sort of information. Never
+    //:      indicative of a problem.
+    //:Warn: NO SUCH THING. Either it's okay and you move on,
+    //:      or you fail fast and crash.
+    void LLC_Pass( const char* msg ){
+        //:USE: LLC_Halt(...)
+        if( msg ){ /** NOOP **/ };
+    }
+    void LLC_Fail( const char* msg ){
+        //:USE: LLC_Fail(...)
+        if( msg ){ /** NOOP **/ };
+    }
+
+    ////////////////////////////////////////////////////////////
+
+    void LLC_Halt( const char* msg ){
+        if( ((void*)0) != llc_pfn_PrintF ){
+            llc_pfn_PrintF("[LLC_Halt:msg]:%s\n", msg );
+        };;
+    }
+    void LLC_Okay( const char* msg ){
+        if( ((void*)0) != llc_pfn_PrintF ){
+            llc_pfn_PrintF("[LLC_Okay:msg]:%s\n", msg );
+        };;
+    }
+////////////////////////////////////////////////////////////////
